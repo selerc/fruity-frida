@@ -100,12 +100,12 @@ export async function deploy(client: Client, version: string) {
     if (majorVersion >= 17) {
       // use 16.4 DDI from e.g. https://github.com/pdso/DeveloperDiskImage/blob/master/16/16.4/DeveloperDiskImage.dmg
       const rawUrl = 'https://github.com/pdso/DeveloperDiskImage/raw/master/16/16.4/DeveloperDiskImage.dmg'
-      //cp.execFile('/usr/bin/curl', {rawUrl, '-o', '/tmp/DDI.dmg'})
-      //'7z -d /tmp/DeveloperDiskImage x /tmp/DDI.dmg'
+      //cp.execFile('/usr/bin/curl', {'-L', rawUrl, '-o', '/tmp/DDI-16.4.dmg'})
+      //'7z -o/tmp/DeveloperDiskImage x /tmp/DDI.dmg'
       // sha256sum /tmp/DDI-16.4.dmg | grep  ab5c7402ba3a8865e2ea45caf53c0ca538c1274422c4bfd42be6ce3f5cb8f522 || echo Checksum FAILED
 
 
-      const mountpoint = await mkdtemp('/tmp/DeveloperDiskImage');
+      const mountpoint = '/tmp/DeveloperDiskImage/DeveloperDiskImage';
       try {
         const server = `${mountpoint}/usr/bin/debugserver`;
         const content = await fsp.readFile(server);
