@@ -92,6 +92,37 @@ export async function deploy(client: Client, version: string) {
     }
   }
 
+  console.log('debugserver: platform is ' + platform());
+  if (platform() === 'linux') {
+    console.log('experimental linux version for iOS17');
+    const shortVersion = version.split('.').slice(0, 2).join('.');
+    const majorVersion = parseInt(shortVersion.split('.').slice(0,1));
+    if (majorVersion >= 17) {
+      // use 16.4 DDI from e.g. https://github.com/pdso/DeveloperDiskImage/blob/master/16/16.4/DeveloperDiskImage.dmg
+      const rawUrl = 'https://github.com/pdso/DeveloperDiskImage/raw/master/16/16.4/DeveloperDiskImage.dmg'
+      //cp.execFile('/usr/bin/curl', {rawUrl, '-o', '/tmp/DDI.dmg'})
+      //'7z -d /tmp/DeveloperDiskImage x /tmp/DDI.dmg'
+      // sha256sum /tmp/DDI-16.4.dmg | grep  ab5c7402ba3a8865e2ea45caf53c0ca538c1274422c4bfd42be6ce3f5cb8f522 || echo Checksum FAILED
+
+
+      const mountpoint = await mkdtemp('/tmp/DeveloperDiskImage');
+      try {
+        const server = `${mountpoint}/usr/bin/debugserver`;
+        const content = await fsp.readFile(server);
+        await write(client, content, DEBUGSERVER);
+        await cmd(`chmod 0777 ${DEBUGSERVER}`);
+        await cmd(`ldid -S${remoteXML} ${DEBUGSERVER}`);
+        console.log(`copied and signed debugserver from Xcode to ${DEBUGSERVER}`);
+      } finally {
+        //await hdiutil('detach', mountpoint);
+      }
+    }
+    else {
+      console.log("doing nothing as iOS<17. abort");
+      throw new Error('iOS <17 not tested');
+    }
+  }
+
   if (platform() === 'darwin') {
     const shortVersion = version.split('.').slice(0, 2).join('.');
 
